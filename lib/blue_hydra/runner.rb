@@ -817,14 +817,28 @@ module BlueHydra
                           if BlueHydra.config["rssi_log"]
                             # LE / CL for classic mode
                             type = k.to_s.gsub('_rssi', '').upcase[0,2]
-
-                            msg = [ts, type, address, rssi].join(' ')
+                            
+                            msg = [ts, type, address, rssi, type].join(' ')
                             BlueHydra.rssi_logger.info(msg)
                           end
                           if BlueHydra.signal_spitter
+                            # uncomment if you wanna see the stuffs in the lawgz
+                            # BlueHydra.logger.info(scan_results[address])
+
+                            # Added for my Bluetooth webserver
+                            # Fields I like: 
+                            # name, status, address, vendor, company, lmp_version (BT classic version?), manufacturer ( who makes the BT chip ), classic_channels, classic_minor_class, classic_major_class, classic_class, le_flags, last_seen, appearance (sometimes says like 'watch')
+                            # unknown fields:
+                            # appearance, company type, firmware
+
+
+                            name = ""
+                            if(scan_results[address][:name])
+                              name = scan_results[address][:name]
+                            end
                             @rssi_data_mutex.synchronize {
                               @rssi_data[address] ||= []
-                              @rssi_data[address] << {ts: ts, dbm: rssi}
+                              @rssi_data[address] << {ts: ts, dbm: rssi, name: name }
                             }
                           end
                         end
